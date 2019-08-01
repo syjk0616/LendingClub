@@ -8,8 +8,6 @@ import datetime
 
 class ConfigData:
 
-    #filename = "config_data.ini"
-
     def __init__(self, filename):
 
         self.configFileName = filename
