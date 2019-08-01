@@ -1,0 +1,61 @@
+This is the automated code investing in LendingClub personal loans. By filling out the "config_data_dummy.ini"
+file properly, actual investment can be made by running "main.py" file.
+
+
+# config_data_dummy.ini
+
+[AccountData] -
+make personal investing account and portfolio in lendingclub, and specify the info here. The lendingclub object in
+"lendingclub.py" will use this info to access the actual account.
+
+[Logging] -
+specify the log file name. The lendingclub object in "lendingclub.py" will log all orders here.
+
+[Model] -
+specify the final fitted model name here. The modelType can be found in investment_helper object in "investhelper.py".
+The modelFile indicates file name of saved model. The model can be fitted and saved through objects in "prediction.py".
+Please find the examples in "Fitting~.ipynb".
+
+[Strategy] -
+these are the setting for investment strategy. The stratype can be found in investment_helper object in "investhelper.py".
+The parameters are for the objects in "investment.py" and are fine tuned through "backtester.py". Please find the
+examples in "Strategy~.ipynb"
+
+
+# py files
+
+Following is the brief summary of each objects/pyfiles.
+
+1. lendingclub
+
+This file contains two objects, which are ConfigData and LendingClub. ConfigData object helps to read important
+data from config file. LendingClub object is the one talking to lending club account. Through the object, we can
+take a look on the account, get list of loans, and make a transaction.
+
+2. Data_Helper
+
+This file contains DataHelper and Transformer object. Transofrmer object is the one contains variable transformation
+information. DataHelper object is the one maintaining all the functions related to data, which is mainly about
+preparing training and test dataset.
+
+3. prediction
+
+This file contains model objects for prediction models. Each object dedicated to prediction model, helping to train,
+predict, and save the models.
+
+4. investment
+
+This file contains the object representing the investing strategy.
+
+5. backtester
+
+This file contains the object helping to backtest given the prediction model and investment strategy.
+
+6. investhelper
+
+This file contains one object which contains the process of actual investment using the previous objects
+
+
+# Note
+
+Please download csv datafiles from the lending club site, and then save those into the ~/Data/ folder.

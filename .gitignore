@@ -1,0 +1,18 @@
+# ignore production config file
+config_data.ini
+
+# ignore log file
+*.log
+
+# ignore saved model
+Model/
+
+# ignore excel/csv datafiles
+Data/*.csv
+
+# ignore system files
+..Datals
+.Rhistory
+.idea/
+.ipynb_checkpoints/
+__pycache__/
