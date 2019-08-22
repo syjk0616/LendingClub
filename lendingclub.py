@@ -4,6 +4,7 @@ import numpy as np
 import logging
 import configparser
 import datetime
+import os
 
 
 class ConfigData:
@@ -79,7 +80,8 @@ class LendingClub:
 
         # set file handler
         formatter = logging.Formatter('%(name)s:%(message)s')
-        file_handler = logging.FileHandler(ConfigData(self.config.configFileName).logFileName)
+        file = "{}/{}".format(os.getcwd(), self.config.logFileName)
+        file_handler = logging.FileHandler(file)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
@@ -214,7 +216,7 @@ class LendingClub:
                 # return confirmation
                 return confirmation
 
-    def port_orders(self, loans):
+    def post_orders(self, loans):
 
         """
         This function post orders for the loans selected by Stratgy object.

@@ -124,7 +124,7 @@ class investment_helper:
         targets = self.strat.invest_loans(loans, backtest=False)
 
         # invest
-        results = self.LC.port_orders(targets)
+        results = self.LC.post_orders(targets)
 
         return results
 

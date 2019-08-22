@@ -20,8 +20,6 @@ class DataHelper:
     but the cleaning will be done here (NEED TO ADD THE CLEANING FUNCTION)
     '''
 
-    workingDir = os.getcwd()
-    filePath = workingDir + "/Data/"
     filename_Var = "variable_selected.txt"
     filename_Data_Pre = "LoanStats"
     filename_map_var = "map_TrainLC.txt"
@@ -113,7 +111,8 @@ class DataHelper:
         '''
 
         # Read file
-        df = pd.read_csv(self.filePath + file_name, sep=",", skiprows=1, low_memory=False)
+        file = self.get_filename(file_name)
+        df = pd.read_csv(file, sep=",", skiprows=1, low_memory=False)
 
         # select 36m only
         df = df[df["term"] == self.term]
@@ -242,7 +241,9 @@ class DataHelper:
         df = df[df["term"]==36]
 
         # get variable mapping
-        with open(self.filePath + self.filename_map_var, 'r') as f:
+        file = self.get_filename(self.filename_map_var)
+
+        with open(file, 'r') as f:
             mapper = json.load(f)
 
         filter_cols = list(mapper.keys())
@@ -332,7 +333,8 @@ class DataHelper:
         This is for a quick check whether to include or not a new csv file.
         '''
 
-        df = pd.read_csv(self.filePath + file_name, sep=",", skiprows=1, low_memory=False)
+        file = self.get_filename(file_name)
+        df = pd.read_csv(file, sep=",", skiprows=1, low_memory=False)
         df = df[df["term"] == self.term]
 
         # loan_status_summary
@@ -352,7 +354,6 @@ class DataHelper:
         df = df[["bad_loan", "sub_grade", "issue_Q", "issue_y"]]
         df.loc[:, "issue"] = df.apply(lambda x: "".join([str(x["issue_y"]), x["issue_Q"]]), axis=1)
 
-
         issues = list(df["issue"].unique())
         for issue in issues:
             df.loc[:, issue] = df["issue"] == issue
@@ -365,18 +366,18 @@ class DataHelper:
 
         return summary
 
-    @classmethod
-    def get_variables(cls):
+    def get_variables(self):
         '''Get full list of selected variables (columns)'''
-        with open(cls.filePath + cls.filename_Var, 'r') as f:
+        filename = self.get_filename(self.filename_Var)
+        with open(filename, 'r') as f:
             variables = json.load(f)
 
         return variables["interim_cols"], variables["info_cols"]
 
-    @classmethod
-    def get_training_files(cls):
+    def get_training_files(self):
         '''Get full list of filenames candidate for training dataset'''
-        files = [f for f in os.listdir(cls.filePath) if f.endswith(".csv") and f.startswith(cls.filename_Data_Pre)]
+        path = self.get_filepath()
+        files = [f for f in os.listdir(path) if f.endswith(".csv") and f.startswith(self.filename_Data_Pre)]
         files.sort()
         return files
 
@@ -404,6 +405,16 @@ class DataHelper:
 
         return float(x)
 
+    @staticmethod
+    def get_filepath():
+        return os.getcwd() + "/Data/"
+
+    @staticmethod
+    def get_filename(filename):
+        filepath = os.getcwd() + "/Data/"
+        return filepath + filename
+
+
 class Transformer:
 
     ''' Transformer
@@ -413,14 +424,13 @@ class Transformer:
     clss specifies the txt file name.
     '''
 
-    workingDir = os.getcwd()
-    filePath = workingDir + "/Data/"
-
     def get_transform_map(self):
 
         '''Load JSON file containing mapping. Noe the filename_map is abstract variable'''
 
-        with open(self.filePath + self.filename_Map, 'r') as f:
+        file = self.get_filename(self.filename_Map)
+
+        with open(file, 'r') as f:
             results = json.load(f)
 
         return results["transform"], results["cut"], results["fill"]
@@ -460,6 +470,11 @@ class Transformer:
             if not np.isnan(fill):
                 df[col].fillna(fill, inplace=True)
         return df
+
+    @staticmethod
+    def get_filename(filename):
+        filepath = os.getcwd() + "/Data/"
+        return filepath + filename
 
 
 class Transformer_full(Transformer):

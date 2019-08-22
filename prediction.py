@@ -6,6 +6,7 @@ import datetime
 import itertools
 import matplotlib.pyplot as plt
 import xgboost as xgb
+import joblib
 from abc import ABC, abstractmethod
 from sklearn import metrics
 from sklearn.preprocessing import StandardScaler
@@ -13,7 +14,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Lasso
-from sklearn.externals import joblib
+#from sklearn.externals import joblib
 
 
 # noinspection SpellCheckingInspection
@@ -53,10 +54,7 @@ class ModelBase(ABC):
     4. call "predict_model"
     """
 
-    workingDir = os.getcwd()
-    filePath = workingDir + "/Data/"
-    modelPath = workingDir + "/Model/"
-    filename_Var = "variable_selected.txt"
+    filename_var = "variable_selected.txt"
 
     def __init__(self, filename=None):
         self.filename = filename
@@ -102,16 +100,16 @@ class ModelBase(ABC):
         info = {"model": model, "scaler": scaler, "x_variables": xvar, "description": desc}
 
         print("Model is saved on {}".format(name))
-        joblib.dump(info, self.modelPath + name)  # name should be .sav file
+        joblib.dump(info, self.get_modelname(name))  # name should be .sav file
 
     def get_model_description(self, model):
         d = datetime.datetime.strftime(datetime.datetime.today(), "%m/%d/%Y")
         return "{}, time: {}".format(self.__str__(), d)
 
-    @classmethod
-    def load_model(cls, name):
+    def load_model(self, name):
         print("Model is loaded from {}".format(name))
-        return joblib.load(cls.modelPath + name)
+        model = self.get_modelname(name)
+        return joblib.load(model)
 
     def set_model_from_file(self):
 
@@ -136,10 +134,6 @@ class ModelBase(ABC):
     @abstractmethod
     def test_model(self, df, model=None):
         pass
-
-    # @abstractmethod
-    # def predict_model(self, df):
-    #     pass
 
     def predict_model(self, df, verbose=False):
 
@@ -315,6 +309,16 @@ class ModelBase(ABC):
         ind = int(np.argmax(avg_scores))
         return raw_scores[ind], avg_scores[ind], grids[ind]
 
+    @staticmethod
+    def get_modelname(name):
+        path = os.getcwd() + "/Model/"
+        return path + name
+
+    @staticmethod
+    def get_filename(name):
+        path = os.getcwd() + "/Data/"
+        return path + name
+
     def get_scaler(self, training):
 
         """
@@ -432,8 +436,7 @@ class ModelLogistic(ModelClassification):
         return "{}, C: {}, penalty: {}, solver: {}, max_iter: {}, tol: {}".format(
             desc, model.C, model.penalty, model.solver, model.max_iter, model.tol)
 
-    @classmethod
-    def set_x_raw_variables(cls):
+    def set_x_raw_variables(self):
 
         """
         This function returns the columns to use in training data from DataHelper.
@@ -441,7 +444,9 @@ class ModelLogistic(ModelClassification):
         one hot encoding.
         """
 
-        with open(cls.filePath + cls.filename_Var, 'r') as f:
+        file = self.get_filename(self.filename_var)
+
+        with open(file, 'r') as f:
             variables = json.load(f)
         return variables["no_missing_cols"]
 
@@ -487,8 +492,7 @@ class ModelRandomForest(ModelClassification):
         return "{}, n_tree/m_try/splits: {}/{}/{} ".format(desc, model.n_estimators,
                                                            model.max_features, model.min_samples_split)
 
-    @classmethod
-    def set_x_raw_variables(cls):
+    def set_x_raw_variables(self):
 
         """
         This function returns the columns to use in training data from DataHelper.
@@ -496,7 +500,9 @@ class ModelRandomForest(ModelClassification):
         one hot encoding.
         """
 
-        with open(cls.filePath + cls.filename_Var, 'r') as f:
+        file = self.get_filename(self.filename_var)
+
+        with open(file, 'r') as f:
             variables = json.load(f)
         return variables["no_missing_cols"]
 
@@ -548,8 +554,7 @@ class ModelXGBClassfication(ModelClassification):
         return "{}, eta: {}, num_rounds: {}, max_depth: {}, subsample: {}".\
             format(desc, model.learning_rate, model.n_estimators, model.max_depth, model.subsample)
 
-    @classmethod
-    def set_x_raw_variables(cls):
+    def set_x_raw_variables(self):
 
         """
         This function returns the columns to use in training data from DataHelper.
@@ -558,7 +563,9 @@ class ModelXGBClassfication(ModelClassification):
         one hot encoding.
         """
 
-        with open(cls.filePath + cls.filename_Var, 'r') as f:
+        file = self.get_filename(self.filename_var)
+
+        with open(file, 'r') as f:
             variables = json.load(f)
         return variables["interim_cols"]
 
@@ -703,8 +710,7 @@ class ModelLinear(ModelRegression):
         desc = super().get_model_description(model)
         return desc
 
-    @classmethod
-    def set_x_raw_variables(cls):
+    def set_x_raw_variables(self):
 
         """
         This function returns the columns to use in training data from DataHelper.
@@ -712,7 +718,9 @@ class ModelLinear(ModelRegression):
         one hot encoding.
         """
 
-        with open(cls.filePath + cls.filename_Var, 'r') as f:
+        file = self.get_filename(self.filename_var)
+
+        with open(file, 'r') as f:
             variables = json.load(f)
         return variables["no_missing_cols"]
 
@@ -755,8 +763,7 @@ class ModelLinearLasso(ModelRegression):
         desc = super().get_model_description(model)
         return "{}, alpha: {}, max_iter: {}, tol: {}".format(desc, model.alpha, model.max_iter, model.tol)
 
-    @classmethod
-    def set_x_raw_variables(cls):
+    def set_x_raw_variables(self):
 
         """
         This function returns the columns to use in training data from DataHelper.
@@ -764,7 +771,9 @@ class ModelLinearLasso(ModelRegression):
         one hot encoding.
         """
 
-        with open(cls.filePath + cls.filename_Var, 'r') as f:
+        file = self.get_filename(self.filename_var)
+
+        with open(file, 'r') as f:
             variables = json.load(f)
         return variables["no_missing_cols"]
 
@@ -809,8 +818,7 @@ class ModelXGBRegression(ModelRegression):
         desc = super().get_model_description(model)
         return desc
 
-    @classmethod
-    def set_x_raw_variables(cls):
+    def set_x_raw_variables(self):
 
         """
         This function returns the columns to use in training data from DataHelper.
@@ -819,7 +827,9 @@ class ModelXGBRegression(ModelRegression):
         one hot encoding.
         """
 
-        with open(cls.filePath + cls.filename_Var, 'r') as f:
+        file = self.get_filename(self.filename_var)
+
+        with open(file, 'r') as f:
             variables = json.load(f)
         return variables["interim_cols"]
 
