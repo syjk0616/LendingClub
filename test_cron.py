@@ -14,16 +14,26 @@ config = lc.ConfigData("config_data.ini")
 # instantiate investment helper
 helper = investhelper.investment_helper(config)
 
-# print Path
-print(helper.DH.get_listed_loandata().shape)
+# loans
+loans = helper.DH.get_listed_loandata()
 
-# get lendingcub object
-LC = helper.LC
+# prediction
+pred = helper.model.predict_model(loans)
 
-# get my loans
-loans = LC.get_my_loans()
-cash = LC.get_cash()
-summary = LC.get_account_summary()
+# run strategy
+targets = helper.strat.invest_loans(loans, backtest=False)
 
-print("available cash: {}".format(cash))
-print("Account Summary: {}".format(summary))
+
+# # print Path
+# print(helper.DH.get_listed_loandata().shape)
+#
+# # get lendingcub object
+# LC = helper.LC
+#
+# # get my loans
+# loans = LC.get_my_loans()
+# cash = LC.get_cash()
+# summary = LC.get_account_summary()
+#
+# print("available cash: {}".format(cash))
+# print("Account Summary: {}".format(summary))

@@ -84,6 +84,7 @@ class ModelBase(ABC):
     def filename(self, filename):
 
         if filename is None:
+
             self._filename = filename
         elif type(filename) == str and filename[-3:] == "sav":
             self._filename = filename

@@ -239,6 +239,9 @@ class LendingClub:
             for loanId, investAmount in zip(loans["id"], loans["invest_amount"]):
                 if loanId not in self.get_my_loan_ids():
                     results.append(self.post_order(loanId, investAmount))
+                else:
+                    if self.logger is not None:
+                        self.logger.info("LoanId {} is already in the portfolio".format(loanId))
             return results
         else:
             if self.logger is not None:
