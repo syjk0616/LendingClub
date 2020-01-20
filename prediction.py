@@ -584,6 +584,7 @@ class ModelXGBClassfication(ModelClassification):
 
         # fit XGBoost
         model = xgb.XGBClassifier(n_estimators=kwargs["n_estimators"],
+                                  tree_method=kwargs["tree_method"],
                                   learning_rate=kwargs["learning_rate"],
                                   max_depth=kwargs["max_depth"],
                                   min_child_weight=kwargs["min_child_weight"],

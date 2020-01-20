@@ -54,7 +54,7 @@ class DataHelper:
         file_names = self.get_training_files()
 
         # Loop through the files
-        dataset = self.get_combined_data(file_names, forTrain=True, verbose=verbose)
+        dataset = self.get_combined_data(file_names, forTrain=True, includeCurrent=False, verbose=verbose)
 
         # reset index
         dataset = dataset.reset_index(drop=True)
@@ -62,7 +62,7 @@ class DataHelper:
         # set training
         self.training = dataset
 
-    def set_test_dataset(self, file_names, verbose=False):
+    def set_test_dataset(self, file_names, includeCurrent=False, verbose=False):
 
         '''
         This is the main function constructing test dataset. It reads files specified as input
@@ -70,7 +70,7 @@ class DataHelper:
         '''
 
         # Loop through the files
-        dataset = self.get_combined_data(file_names, forTrain=False, verbose=verbose)
+        dataset = self.get_combined_data(file_names, forTrain=False, includeCurrent=includeCurrent, verbose=verbose)
 
         # reset index
         dataset = dataset.reset_index(drop=True)
@@ -78,7 +78,7 @@ class DataHelper:
         # set test
         self.test = dataset
 
-    def get_combined_data(self, file_names, forTrain=False, verbose=False):
+    def get_combined_data(self, file_names, forTrain=False, includeCurrent=False, verbose=False):
 
         '''
         This function loops over the filenames provided and appends if available
@@ -90,7 +90,7 @@ class DataHelper:
         for name in file_names:
 
             if verbose: print("Reading {}...".format(name))
-            df = self.get_rawdata_from_file(name, forTrain=forTrain, verbose=verbose)
+            df = self.get_rawdata_from_file(name, forTrain=forTrain, includeCurrent=includeCurrent, verbose=verbose)
 
             if df.shape == (0, 0):
                 if verbose: print("Excluded: Out of period")
@@ -103,7 +103,7 @@ class DataHelper:
 
         return dataset
 
-    def get_rawdata_from_file(self, file_name, forTrain=False, verbose=False):
+    def get_rawdata_from_file(self, file_name, forTrain=False, includeCurrent=False, verbose=False):
 
         '''
         This function reads data from single filename, basic filtering by term, issue_d, loan_status.
@@ -140,7 +140,8 @@ class DataHelper:
                 return pd.DataFrame()
 
         # remove live loans from the dataset
-        df = df[df["loan_status"] != "Current"]
+        if not includeCurrent:
+            df = df[df["loan_status"] != "Current"]
 
         # add quarter and year
         df["issue_Q"] = df["issue_d"].map(self.get_quarter)
@@ -203,7 +204,7 @@ class DataHelper:
         df = df[df["dti"] >= 0]
 
         # Application Type
-        df["application_type"] = np.where(df["application_type"] == "Inividual", 1, 0)
+        df["application_type"] = np.where(df["application_type"] == "Individual", 1, 0)
 
         # decreases states
         df["addr_state"] = df["addr_state"].map(lambda x: "Other" if x not in self.states else x)
