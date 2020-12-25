@@ -23,17 +23,16 @@ pred = helper.model.predict_model(loans)
 # run strategy
 targets = helper.strat.invest_loans(loans, backtest=False)
 
+# print Path
+print(helper.DH.get_listed_loandata().shape)
 
-# # print Path
-# print(helper.DH.get_listed_loandata().shape)
-#
-# # get lendingcub object
-# LC = helper.LC
-#
-# # get my loans
-# loans = LC.get_my_loans()
-# cash = LC.get_cash()
-# summary = LC.get_account_summary()
-#
-# print("available cash: {}".format(cash))
-# print("Account Summary: {}".format(summary))
+# get lendingcub object
+LC = helper.LC
+
+# get my loans
+loans = LC.get_my_loans()
+cash = LC.get_cash()
+summary = LC.get_account_summary()
+
+print("available cash: {}".format(cash))
+print("Account Summary: {}".format(summary))

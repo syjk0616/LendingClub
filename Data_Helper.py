@@ -20,9 +20,9 @@ class DataHelper:
     but the cleaning will be done here (NEED TO ADD THE CLEANING FUNCTION)
     '''
 
-    filename_Var = "variable_selected.txt"
+    filename_Var = "variable_selected2.txt"
     filename_Data_Pre = "LoanStats"
-    filename_map_var = "map_TrainLC.txt"
+    filename_map_var = "map_TrainLC2.txt"
 
     def __init__(self, periodStart, periodEnd, transformer, lendingclub):
 
@@ -32,7 +32,7 @@ class DataHelper:
         self.endYear = int(periodEnd[1])
         self.term = " 36 months"
         self.bad_loans = ["Charged Off", "Default", "In Grace Period", "Late (16-30 days)", "Late (31-120 days)"]
-        self.states = ["CA", "TX", "NY", "FL", "IL", "NJ", "GA", "OH", "PA"]
+        self.states = ['AZ', 'CA', 'FL', 'GA', 'IL', 'MA', 'MD', 'MI', 'NC', 'NJ', 'NY', 'OH', 'PA', 'TX', 'VA']
 
         # This is separate object
         self.transformer = transformer
@@ -180,8 +180,8 @@ class DataHelper:
             df.loc[df["revol_util"].notna(),"revol_util"].map(lambda x: np.float32(x.split("%")[0]) / 100)
         df["revol_util"] = list(map(float, df["revol_util"]))
 
-        # home_ownership - delete ANY
-        df = df[df["home_ownership"] != "ANY"]  # delete any
+        # home_ownership - change NONE to ANY
+        df.loc[df["home_ownership"] == "NONE", "home_ownership"] = "ANY"
 
         # purpose - combine to other category
         df.loc[df["purpose"] == "educational", "purpose"] = "other"
@@ -208,6 +208,16 @@ class DataHelper:
 
         # decreases states
         df["addr_state"] = df["addr_state"].map(lambda x: "Other" if x not in self.states else x)
+
+        # change verification status
+        # since we are matching to LC format, no need to have this in get_listed_loandata
+        df.loc[df["verification_status"] == "Verified", "verification_status"] = "VERIFIED"
+        df.loc[df["verification_status"] == "Source Verified", "verification_status"] = "SOURCE_VERIFIED"
+        df.loc[df["verification_status"] == "Not Verified", "verification_status"] = "NOT_VERIFIED"
+
+        df.loc[df["verification_status_joint"] == "Verified", "verification_status_joint"] = "VERIFIED"
+        df.loc[df["verification_status_joint"] == "Source Verified", "verification_status_joint"] = "SOURCE_VERIFIED"
+        df.loc[df["verification_status_joint"] == "Not Verified", "verification_status_joint"] = "NOT_VERIFIED"
 
         # change last_pymnt_d to dateformat
         # we need do this carefully, since this is always NaN if the loan_status is "charged-off"
@@ -263,8 +273,8 @@ class DataHelper:
         # revol_util - change it to ratio from string
         df["revol_util"] = df["revol_util"] / 100
 
-        # home_ownership - delete ANY
-        df = df[df["home_ownership"] != "ANY"]  # delete any
+        # home_ownership - change NONE to ANY
+        df.loc[df["home_ownership"] == "NONE", "home_ownership"] = "ANY"
 
         # purpose - combine to other category
         df.loc[df["purpose"] == "educational", "purpose"] = "other"
@@ -299,7 +309,7 @@ class DataHelper:
 
         return df
 
-    def get_cross_validation_data(self, fold=5):
+    def get_cross_validation_data(self, fold=5, shuffle=False):
 
         # get training
         df = self.training.copy()
@@ -312,7 +322,7 @@ class DataHelper:
         marks = time_marks.unique()
 
         # instantiate KFold
-        kf = KFold(n_splits=fold)
+        kf = KFold(n_splits=fold, shuffle=shuffle)
 
         # CV by each time mark
         for mark in marks:
@@ -483,5 +493,5 @@ class Transformer_full(Transformer):
     '''This is the child class applying full transformation'''
 
     def __init__(self):
-        self.filename_Map = "transform_map.txt"
+        self.filename_Map = "transform_map2.txt"
 

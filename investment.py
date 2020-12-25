@@ -13,15 +13,14 @@ class StrategyBase(ABC):
         self.model = model
         self.FICO = 550
 
-    def invest_loans(self, loans, backtest=False):
+    def invest_loans(self, df, backtest=False):
 
-        # clean loans
-        flag = not backtest
-        ind = self.model.clean_data(loans, prediction=flag, index=True)
-        loans = loans.loc[ind, :]
-
-        # prediction using model
-        pred = self.model.predict_model(loans)
+        if not backtest:
+            loans, pred = self.model.predict_model(df)
+        else:
+            # need original info for backtesting
+            temp, pred = self.model.predict_model(df)
+            loans = df.loc[temp.index, :]
 
         # apply investment logic
         investments = self.apply_strategy(loans, pred, backtest=backtest)
@@ -78,7 +77,7 @@ class StrategyBase(ABC):
 
         # in backtest, FICO information is not available
         if not backtest:
-            loans = loans[loans["ficoRangeLow"] >= self.FICO]
+            loans = loans[loans["fico_range_high"] >= self.FICO]
 
         # any explicit filter goes to child
         return loans

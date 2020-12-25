@@ -54,7 +54,7 @@ class ModelBase(ABC):
     4. call "predict_model"
     """
 
-    filename_var = "variable_selected.txt"
+    filename_var = "variable_selected2.txt"
 
     def __init__(self, filename=None):
         self.filename = filename
@@ -151,8 +151,11 @@ class ModelBase(ABC):
             pass
 
         # clean data
-        df = self.clean_data(df, prediction=True, index=False)
+        df = self.clean_data(df)
         n = df.shape[0]
+
+        # save original to return
+        temp_df = df.copy()
 
         # standardize data
         if self.scale and self.scaler is not None:
@@ -190,7 +193,7 @@ class ModelBase(ABC):
         else:
             pred = None
 
-        return pred
+        return temp_df, pred
 
     def get_data_for_model(self, training, test):
 
@@ -234,21 +237,14 @@ class ModelBase(ABC):
 
         return training, test
 
-    def clean_data(self, df, prediction=False, index=False):
+    def clean_data(self, df):
 
-        if prediction:
-            variables = self.x_raw_variables
-        else:
-            variables = self.x_raw_variables + [self.y_variable]
-
+        variables = self.x_raw_variables
         df = df[variables]
         if not self.handle_NA:
             df = df.dropna()
 
-        if index:
-            return df.index
-        else:
-            return df
+        return df
 
     def clean_data_ind(self, df):
 
